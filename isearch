@@ -1,0 +1,67 @@
+#!/usr/bin/env python3
+
+from argparse import ArgumentParser
+from typing import Any
+
+from schemas.arg_parser import Arguments, SubCommand
+from utils.set_arguments import set_arguments
+
+
+def face_operator(path: str, output_path: str, arguments: Any) -> None:
+    print("face")
+    print(path)
+    print(arguments)
+
+
+def color_operator(path: str, output_path: str, arguments: Any) -> None:
+    print("color")
+    print(path)
+    print(arguments)
+
+
+if __name__ == "__main__":
+    parser = ArgumentParser()
+    sub_parser = parser.add_subparsers(title="subcommands", dest="subcommand")
+
+    face = sub_parser.add_parser(**SubCommand(name="face", help=""))
+    face = set_arguments(
+        subcommand=face,
+        arguments=[
+            Arguments.list,
+            Arguments.path,
+            Arguments.output,
+            Arguments.threshold,
+        ],
+    )
+
+    color = sub_parser.add_parser(**SubCommand(name="color", help=""))
+    color = set_arguments(
+        subcommand=color,
+        arguments=[
+            Arguments.list,
+            Arguments.path,
+            Arguments.color,
+            Arguments.output,
+        ],
+    )
+
+    arguments = parser.parse_args()
+    if sub_command_name := arguments.subcommand:
+        path = arguments.path
+        output_path = arguments.output
+        arguments = {argument[0]: argument[1] for argument in arguments._get_kwargs()}
+
+        if sub_command_name == "face":
+            face_operator(
+                path=path,
+                arguments=arguments,
+                output_path=output_path,
+            )
+        elif sub_command_name == "color":
+            color_operator(
+                path=path,
+                arguments=arguments,
+                output_path=output_path,
+            )
+        exit(0)
+    parser.print_usage()

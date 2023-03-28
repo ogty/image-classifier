@@ -10,7 +10,6 @@ import cv2
 import dlib
 from PIL import Image
 import pyheif
-from termcolor import colored
 from tqdm import tqdm
 
 
@@ -48,7 +47,7 @@ class FaceImageClassifier:
             image_paths.append((file_path, extension))
         return image_paths
 
-    def search(self, **kwargs) -> FaceImageClassifier:
+    def classifier(self, **kwargs) -> FaceImageClassifier:
         image_paths = self._get_image_paths()
         with tqdm(total=len(image_paths)) as progress:
             with ProcessPoolExecutor(max_workers=os.cpu_count() // 2) as executor:
@@ -95,9 +94,7 @@ class FaceImageClassifier:
         if extension == ".heic":
             try:
                 image_path = FaceImageClassifier.heif_to_png(image_path, **kwargs)
-            except ValueError as e:
-                colored_image_path = colored(image_path, "blue")
-                print(f"{colored_image_path}: {e}")
+            except ValueError:
                 return ""
         face_included = FaceImageClassifier.is_face_included(image_path, **kwargs)
         return image_path if face_included else ""
@@ -109,10 +106,12 @@ class FaceImageClassifier:
             raise FileNotFoundError(f"{path} does not exist")
 
     @staticmethod
-    def heif_to_png(image_path: str, is_deleted: bool = False, **kwargs) -> str:
-        heif_file = pyheif.read(image_path)
+    def heif_to_png(image_path: str, is_image_deleted: bool = False, **kwargs) -> str:
         png_path = image_path.replace(".HEIC", ".png")
+        if os.path.exists(png_path):
+            return png_path
 
+        heif_file = pyheif.read(image_path)
         image = Image.frombytes(
             heif_file.mode,
             heif_file.size,
@@ -123,7 +122,7 @@ class FaceImageClassifier:
         )
 
         image.save(png_path, "PNG")
-        if is_deleted:
+        if is_image_deleted:
             os.remove(image_path)
 
         return png_path
@@ -131,6 +130,6 @@ class FaceImageClassifier:
 
 if __name__ == "__main__":
     face_image_classifier = FaceImageClassifier(path="./target")
-    face_image_classifier.search(is_rectangle_enabled=True, is_deleted=True).move(
-        "./out"
-    )
+    face_image_classifier.classifier(
+        is_rectangle_enabled=True, is_image_deleted=True
+    ).move("./out")

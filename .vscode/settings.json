@@ -12,5 +12,15 @@
   "[json][jsonc]": {
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  },
+  "cSpell.words": [
+    "haarcascade",
+    "frontalface",
+    "imread",
+    "frombytes",
+    "pyheif",
+    "tqdm",
+    "imwrite",
+    "termcolor"
+  ]
 }

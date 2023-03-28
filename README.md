@@ -1,1 +1,1 @@
-<h1 align="center">🔎 Search Image 🖼️</h1>
+<h1 align="center">🖼️ Image Classifier 🗂️</h1>

@@ -21,6 +21,7 @@
     "pyheif",
     "tqdm",
     "imwrite",
-    "termcolor"
+    "termcolor",
+    "dlib"
   ]
 }

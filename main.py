@@ -7,13 +7,11 @@ import shutil
 from typing import List, Tuple
 
 import cv2
-from tqdm import tqdm
+import dlib
 from PIL import Image
 import pyheif
 from termcolor import colored
-
-
-cascade = cv2.CascadeClassifier("./data/haarcascade_frontalface_default.xml")
+from tqdm import tqdm
 
 
 class FaceImageClassifier:
@@ -69,19 +67,25 @@ class FaceImageClassifier:
         return self
 
     @staticmethod
-    def detect_image(
+    def is_face_included(
         image_path: str, is_rectangle_enabled: bool = False, **kwargs
     ) -> bool:
+        detector = dlib.get_frontal_face_detector()
+
         image = cv2.imread(image_path)
-        face_list = cascade.detectMultiScale(image, minSize=(150, 150))
-        if len(face_list) == 0:
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        faces = detector(gray)
+
+        if len(faces) == 0:
             return False
 
         if is_rectangle_enabled:
-            for x, y, w, h in face_list:
-                color = (0, 0, 255)
-                thickness = 3
-                cv2.rectangle(image, (x, y), (x + w, y + h), color, thickness=thickness)
+            for face in faces:
+                x1 = face.left()
+                y1 = face.top()
+                x2 = face.right()
+                y2 = face.bottom()
+                cv2.rectangle(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
             cv2.imwrite(image_path, image)
 
         return True
@@ -95,7 +99,7 @@ class FaceImageClassifier:
                 colored_image_path = colored(image_path, "blue")
                 print(f"{colored_image_path}: {e}")
                 return ""
-        face_included = FaceImageClassifier.detect_image(image_path, **kwargs)
+        face_included = FaceImageClassifier.is_face_included(image_path, **kwargs)
         return image_path if face_included else ""
 
     @staticmethod
@@ -127,4 +131,6 @@ class FaceImageClassifier:
 
 if __name__ == "__main__":
     face_image_classifier = FaceImageClassifier(path="./target")
-    face_image_classifier.search(is_deleted=True).move("./out")
+    face_image_classifier.search(is_rectangle_enabled=True, is_deleted=True).move(
+        "./out"
+    )

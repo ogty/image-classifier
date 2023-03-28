@@ -15,16 +15,14 @@ from tqdm import tqdm
 
 class FaceImageClassifier:
     def __init__(self, path: str) -> None:
+        self.detected_image_paths = []
+        self.valid_extensions = [".heic", ".png", ".jpg", ".jpeg"]
+
         absolute_path = os.path.abspath(path)
         self.check_existence(absolute_path)
-
         target_directory_path = os.path.join(absolute_path, "**/*")
         paths = glob(target_directory_path, recursive=True)
         self.file_paths = filter(lambda path: os.path.isfile(path), paths)
-
-        self.valid_extensions = [".heic", ".png", ".jpg", ".jpeg"]
-
-        self.detected_image_paths = []
 
     def move(self, move_directory_path: str) -> FaceImageClassifier:
         self.check_existence(move_directory_path)

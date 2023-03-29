@@ -1,0 +1,5 @@
+Pillow
+dlib
+opencv-python
+pyheif
+tqdm
